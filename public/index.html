@@ -1,0 +1,42 @@
+<!DOCTYPE HTML>
+<html>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro" rel="stylesheet"/>
+    <link rel="shortcut icon" type="image/png" href="favicon.png"/>
+    <link rel="stylesheet" type="text/css" href="css/style.css"/>
+    <title>HTML5 - 2048</title>
+    <h1 class="title">2048</h1>
+    <h3 class="subtitle">A weekend project by Bala, Keane, and Kunal</h3>
+    <div class="game-container">
+        <img id="iphone" src="img/phone.png" alt="iPhone X"/>
+        <canvas id="game" width="306" height="665"></canvas>
+    </div>
+    <div>
+        <a href="https://github.com/Balakumaran-Bala/HTML5-2048" target="_blank">GitHub</a>
+    </div>
+
+    <p id="leaderboard">coming soon!</p>
+    <!--<script src="scripts/render.js"></script>-->
+    <!--<script src="scripts/input.js"></script>-->
+    <!--<script src="scripts/update.js"></script>-->
+    <!--<script src="scripts/main.js"></script>-->
+    <body>
+        <form onSubmit="changeName(); return false">
+            <select id="player">
+                <option value="Max">Max</option>
+                <option value="Keane">Keane</option>
+                <option value="Kunal">Kunal</option>
+                <option value="Bala">Bala</option>
+                <option value="Usman">Usman</option>
+                <option value="Andy">Andy</option>
+            </select>
+            <input type="submit" value="Submit">
+        </form>
+        <script>
+            function changeName() {
+                var e = document.getElementById("player");
+                playerName = e.options[e.selectedIndex].text;
+            }
+        </script>
+    </body>
+</html>
