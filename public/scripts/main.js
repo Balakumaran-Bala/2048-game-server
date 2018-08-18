@@ -1,44 +1,30 @@
-var canvas = document.getElementById("game");
-
-if ((window.screen.width / window.screen.height) > 0.47 && window.screen.width <= 425) {
-    let canvasHeight = canvas.getBoundingClientRect().height; // window.screen.width*2.17
-    canvas.style.top = "-" + Math.min(canvasHeight * .15, canvasHeight - window.screen.height) + "px";
-}
-
-var ctx = canvas.getContext("2d");
-ctx.scale(.6, .6);
-
-var score;
 var grid;
+var score;
 var game_over;
 var restartMouseOver;
-var scoreSent;
-var playerName;
 
-var restartGame = function() {
-    score = 0;
-    grid = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ];
+var canvas = document.getElementById("game");
+var ctx = canvas.getContext("2d");
+
+socket.on('updateMove', function(data) {
+    //console.log(data.state.animation);
+    animating_blocks = data.state.animation;
+    grid = data.state.newState;
+});
+
+socket.on('init', function(data) {
+
+    if ((window.screen.width / window.screen.height) > 0.47 && window.screen.width <= 425) {
+        let canvasHeight = canvas.getBoundingClientRect().height; // window.screen.width*2.17
+        canvas.style.top = "-" + Math.min(canvasHeight * .15, canvasHeight - window.screen.height) + "px";
+    }
+
+    ctx.scale(.6, .6);
+
+    grid = data.state;
     game_over = false;
-    scoreSent = false;
-    playerName = "";
+    score = 0;
 
-    let randI = Math.floor(Math.random()*4);
-    let randJ = Math.floor(Math.random()*4);
-
-    grid[randI][randJ] = 2;
-    randI = Math.floor(Math.random()*4);
-    randJ = Math.floor(Math.random()*4);
-    grid[randI][randJ] = 2;
-}
-
-restartGame();
-
-background.onload = function() {
-    render(); // why can't this be assigned to onload alone?
+    render();
     inputInit(); // start the game
-};
+});
