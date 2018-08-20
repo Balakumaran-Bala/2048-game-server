@@ -16,10 +16,6 @@
     </div>
 
     <p id="leaderboard">coming soon!</p>
-    <!--<script src="scripts/render.js"></script>-->
-    <!--<script src="scripts/input.js"></script>-->
-    <!--<script src="scripts/update.js"></script>-->
-    <!--<script src="scripts/main.js"></script>-->
     <body>
         <form onSubmit="changeName(); return false">
             <select id="player">
@@ -32,11 +28,13 @@
             </select>
             <input type="submit" value="Submit">
         </form>
+        <script src="/socket.io/socket.io.js"></script>
         <script>
-            function changeName() {
-                var e = document.getElementById("player");
-                playerName = e.options[e.selectedIndex].text;
-            }
+            var socket = io.connect('http://localhost:8080');
+
         </script>
+        <script src="scripts/render.js"></script>
+        <script src="scripts/main.js"></script>
+        <script src="scripts/input.js"></script>
     </body>
 </html>

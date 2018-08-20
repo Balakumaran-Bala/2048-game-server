@@ -23,7 +23,14 @@ io.on('connection', function (socket) {
 
   	socket.on('playerMove', function(data) {
   		console.log("the following key was pressed: " + data.key);
-  		var move = game.moveLeft();
+  		if (data.key == 37)
+  			var move = game.moveLeft();
+  		else if (data.key == 39)
+  			var move = game.moveRight();
+  		else if (data.key == 38)
+  			var move = game.moveUp();
+  		else if (data.key == 40)
+  			var move = game.moveDown();
   		socket.emit('updateMove', {state: move});
   	});
 

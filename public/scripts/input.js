@@ -1,17 +1,10 @@
 let fingerX = 0;
 let fingerY = 0;
 
-// socket.on('updateMove', function(data) {
-// 	console.log(data.state.newState);
-// 	animating_blocks = data.state.animation;
-// 	grid = data.state.newState;
-// });
-
 var inputInit = function() {
 	addEventListener("keydown", function(event) {
 	    if ([37, 38, 39, 40].includes(event.keyCode)) {
 	        event.preventDefault();
-	        console.log("hello");
 	        socket.emit('playerMove', {key : event.keyCode});
 	    }
 	}, false);

@@ -7,9 +7,9 @@ var canvas = document.getElementById("game");
 var ctx = canvas.getContext("2d");
 
 socket.on('updateMove', function(data) {
-    //console.log(data.state.animation);
     animating_blocks = data.state.animation;
     grid = data.state.newState;
+    animating_blocks = [];
 });
 
 socket.on('init', function(data) {
