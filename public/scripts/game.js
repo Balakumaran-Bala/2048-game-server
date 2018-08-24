@@ -1,68 +1,154 @@
 var redis = require('redis');
 var client = redis.createClient();
 
+const {promisify} = require('util');
+const lindex = promisify(client.lindex).bind(client);
+const hget = promisify(client.hget).bind(client);
+
 var score;
 var grid;
 var game_over;
-var restartMouseOver;
 var animating_blocks = [];
 
-function updateGrid() {
-    for (var i = 0; i < 4; i++) {
-        client.lindex("gameState:row0", i, function(err, result) {
-            if (err) 
-                throw err
-            else
-                grid[0][i] = result;
-        });
-    }
+var updateGrid = function(id) {
 
-    for (var i = 0; i < 4; i++) {
-        client.lindex("gameState:row1", i, function(err, result) {
-            if (err) 
-                throw err
-            else
-                grid[1][i] = result;
-        });
-    }
+    return new Promise(function(resolve, reject) {
 
-    for (var i = 0; i < 4; i++) {
-        client.lindex("gameState:row2", i, function(err, result) {
-            if (err) 
-                throw err
-            else
-                grid[2][i] = result;
-        });
-    }
+        lindex("user:" + id + ":gameState:row0", 0).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[0][0] = res;
+        })
 
-    for (var i = 0; i < 4; i++) {
-        client.lindex("gameState:row3", i, function(err, result) {
-            if (err) 
-                throw err
-            else
-                grid[3][i] = result;
-        });
-    }
+        lindex("user:" + id + ":gameState:row0", 1).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[0][1] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row0", 2).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[0][2] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row0", 3).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[0][3] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row1", 0).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[1][0] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row1", 1).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[1][1] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row1", 2).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[1][2] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row1", 3).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[1][3] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row2", 0).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[2][0] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row2", 1).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[2][1] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row2", 2).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[2][2] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row2", 3).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[2][3] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row3", 0).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[3][0] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row3", 1).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[3][1] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row3", 2).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[3][2] = res;
+        })
+
+        lindex("user:" + id + ":gameState:row3", 3).then(res => {
+            console.log("aight so this is done: " + res);
+            grid[3][3] = res;
+            resolve(grid);
+        })
+    });
+
 }
 
-function updateState() {
-    client.flushdb();
+function updateState(id) {
+    //client.flushdb();
 
-    for (var i = 0; i < 4; i++) {
-        client.rpush("gameState:row0", grid[0][i]);
-    }
+    return new Promise((resolve, reject) => {
+        console.log("updated state for user: " + id);
 
-    for (var i = 0; i < 4; i++) {
-        client.rpush("gameState:row1", grid[1][i]);
-    }
 
-    for (var i = 0; i < 4; i++) {
-        client.rpush("gameState:row2", grid[2][i]);
-    }
+        for (let i = 0; i < 4; i++) {
+            //console.log("after - row0: " + i + " " + grid[0][i]);
+            client.lpop("user:" + id + ":gameState:row0");
+        }
 
-    for (var i = 0; i < 4; i++) {
-        client.rpush("gameState:row3", grid[3][i]);
-    }
+        for (let i = 0; i < 4; i++) {
+            //console.log("after - row0: " + i + " " + grid[0][i]);
+            client.rpush("user:" + id + ":gameState:row0", grid[0][i]);
+        }
+
+        ///////////////////////////////////////////////////////////////
+        for (let i = 0; i < 4; i++) {
+            //console.log("after - row0: " + i + " " + grid[0][i]);
+            client.lpop("user:" + id + ":gameState:row1");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            //console.log("after - row1: " + i + " " + grid[1][i]);
+            client.rpush("user:" + id + ":gameState:row1", grid[1][i]);
+        }
+
+        ///////////////////////////////////////////////////////////////
+        for (let i = 0; i < 4; i++) {
+            //console.log("after - row0: " + i + " " + grid[0][i]);
+            client.lpop("user:" + id + ":gameState:row2");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            //console.log("after - row2: " + i + " " + grid[2][i]);
+            client.rpush("user:" + id + ":gameState:row2", grid[2][i]);
+        }
+
+        ///////////////////////////////////////////////////////////////
+        for (let i = 0; i < 4; i++) {
+            //console.log("after - row0: " + i + " " + grid[0][i]);
+            client.lpop("user:" + id + ":gameState:row3");
+        }
+
+        for (let i = 0; i < 4; i++) {
+            //console.log("after - row3: " + i + " " + grid[3][i]);
+            client.rpush("user:" + id + ":gameState:row3", grid[3][i]);
+        }
+    });
+    
 }
 
 function generateRand(oldGrid, timeNow) {
@@ -100,9 +186,37 @@ function generateRand(oldGrid, timeNow) {
     }
 }
 
-function restartGame() {
+function gameOver() {
+    let change_possible = false;
+    for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[0].length; j++) {
+            if (0 < i && i < grid.length - 1) {
+                if (grid[i-1][j] === grid[i][j] ||
+                    grid[i+1][j] === grid[i][j] ||
+                    grid[i-1][j] === 0 ||
+                    grid[i+1][j] === 0) {
+                        change_possible = true;
+                    }
+            }
+            if (0 < j && j < grid[0].length - 1) {
+                if (grid[i][j-1] === grid[i][j] ||
+                    grid[i][j+1] === grid[i][j] ||
+                    grid[i][j-1] === 0 ||
+                    grid[i][j+1] === 0) {
+                        change_possible = true;
+                    }
+            }
+        }
+    }
 
-    console.log("restart game");
+    if (!change_possible) {
+        game_over = true;
+    }
+
+    return game_over;
+}
+
+function restartGame(socket_id, player_id) {
 	score = 0;
     grid = [
         [0, 0, 0, 0],
@@ -120,12 +234,15 @@ function restartGame() {
     randJ = Math.floor(Math.random()*4);
     grid[randI][randJ] = 2;
 
-    updateState();
+    client.hset("players", socket_id, player_id.toString());
+    updateState(player_id.toString());
 
     return grid;
 }
 
-function logicLeft() {
+var logicLeft = function(grid) {
+
+    console.log("logicLeft start");
     let timeNow = Date.now();
 
     animating_blocks = [];
@@ -144,9 +261,9 @@ function logicLeft() {
         [0, 0, 0, 0]
     ];
 
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            oldGrid[i][j] = grid[i][j];
+    for (let a = 0; a < 4; a++) {
+        for (let b = 0; b < 4; b++) {
+            oldGrid[a][b] = grid[a][b];
         }
     }
 
@@ -200,7 +317,12 @@ function logicLeft() {
         }
     }
 
-    generateRand(oldGrid, timeNow);
+    if (!gameOver())
+        generateRand(oldGrid, timeNow);
+
+    console.log(grid);
+    console.log("logicLeft end");
+    return grid;
 }
 
 function logicRight() {
@@ -278,7 +400,8 @@ function logicRight() {
         }
     }
 
-    generateRand(oldGrid, timeNow);
+    if (!gameOver())
+        generateRand(oldGrid, timeNow);
 
 }
 
@@ -357,7 +480,8 @@ function logicUp() {
         }
     }
 
-    generateRand(oldGrid, timeNow);
+    if (!gameOver())
+        generateRand(oldGrid, timeNow);
 }
 
 function logicDown() {
@@ -435,63 +559,98 @@ function logicDown() {
         }
     }
 
-    generateRand(oldGrid, timeNow);
+    if (!gameOver())
+        generateRand(oldGrid, timeNow);
 
 }
 
-function moveLeft() {
+// *** Currently working on moveLeft, will fix others when this works ***
+function moveLeft(id) {
+    // let promise = new Promise(function(resolve, reject) {
+    //     client.hget("players", id, function(err, result) {
+    //         if (err) throw err
+    //         else {
+    //             console.log("moved left for player: " + result);
+    //             resolve(result);
+    //         }
+    //     })
+    // });
+    hget("players", id).then(res => {
+        return updateGrid(res);
+    })
+    .then(res => {
+        console.log(res);
+        return logicLeft(res);
+    }).then(res => {
+        console.log(res);
+    });
+    //.catch(error => console.log("this is the error: " + error));
+    // return {
+    //     newState: grid, 
+    //     animation: animating_blocks,
+    //     score: score,
+    //     isOver: game_over
+    // }
+}
 
-    updateGrid();
+function moveRight(id) {
 
-    logicLeft();
-
-    updateState();
+    client.hget("players", id, function(err, result) {
+        if (err) throw err
+        else {
+            console.log("moved right for player: " + result);
+            updateGrid(result);
+            logicRight();
+            updateState(result);
+        }
+    })
 
     return {
         newState: grid, 
-        animation: animating_blocks
+        animation: animating_blocks,
+        score: score,
+        isOver: game_over
     }
 }
 
-function moveRight() {
+function moveUp(id) {
 
-    updateGrid();
-
-    logicRight();
-    
-    updateState();
+    client.hget("players", id, function(err, result) {
+        if (err) throw err
+        else {
+            console.log("moved up for player: " + result);
+            updateGrid(result);
+            logicUp();
+            updateState(result);
+        }
+    })
 
     return {
         newState: grid, 
-        animation: animating_blocks
+        animation: animating_blocks,
+        score: score,
+        isOver: game_over
     }
 }
 
-function moveUp() {
+function moveDown(id) {
 
-    updateGrid();
-
-    logicUp();
-
-    updateState();
-
-    return {
-        newState: grid, 
-        animation: animating_blocks
-    }
-}
-
-function moveDown() {
-
-    updateGrid();
-
-    logicDown();
-
-    updateState();
+    client.hget("players", id, function(err, result) {
+        if (err) throw err
+        else {
+            console.log("moved down for player: " + result);
+            updateGrid(result); 
+            logicDown();
+            updateState(result);
+                
+        }
+    })
 
     return {
         newState: grid, 
-        animation: animating_blocks
+        animation: animating_blocks,
+        score: score,
+        isOver: game_over
     }
 }
 

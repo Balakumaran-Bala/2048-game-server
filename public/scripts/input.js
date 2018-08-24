@@ -30,7 +30,8 @@ var inputInit = function() {
         if (game_over) {
             if (0 < relativeX && relativeX < canvas.width &&
                 500 < relativeY && relativeY < 590) {
-                restartGame();
+                //restartGame();
+            	socket.emit('restart');
             }
         }
     }, false);

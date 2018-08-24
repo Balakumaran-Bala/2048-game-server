@@ -6,20 +6,14 @@ var restartMouseOver;
 var canvas = document.getElementById("game");
 var ctx = canvas.getContext("2d");
 
-socket.on('updateMove', function(data) {
-    animating_blocks = data.state.animation;
-    grid = data.state.newState;
-    animating_blocks = [];
-});
+if ((window.screen.width / window.screen.height) > 0.47 && window.screen.width <= 425) {
+    let canvasHeight = canvas.getBoundingClientRect().height; // window.screen.width*2.17
+    canvas.style.top = "-" + Math.min(canvasHeight * .15, canvasHeight - window.screen.height) + "px";
+}
+
+ctx.scale(.6, .6);
 
 socket.on('init', function(data) {
-
-    if ((window.screen.width / window.screen.height) > 0.47 && window.screen.width <= 425) {
-        let canvasHeight = canvas.getBoundingClientRect().height; // window.screen.width*2.17
-        canvas.style.top = "-" + Math.min(canvasHeight * .15, canvasHeight - window.screen.height) + "px";
-    }
-
-    ctx.scale(.6, .6);
 
     grid = data.state;
     game_over = false;
@@ -27,4 +21,13 @@ socket.on('init', function(data) {
 
     render();
     inputInit(); // start the game
+});
+
+socket.on('updateMove', function(data) {
+    console.log(data.state);
+    animating_blocks = data.state.animation;
+    grid = data.state.newState;
+    score = data.state.score;
+    game_over = data.state.isOver;
+    animating_blocks = [];
 });
