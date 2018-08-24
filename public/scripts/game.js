@@ -146,6 +146,7 @@ function updateState(id) {
         for (let i = 0; i < 4; i++) {
             //console.log("after - row3: " + i + " " + grid[3][i]);
             client.rpush("user:" + id + ":gameState:row3", grid[3][i]);
+            resolve();
         }
     });
     
@@ -240,418 +241,472 @@ function restartGame(socket_id, player_id) {
     return grid;
 }
 
-var logicLeft = function(grid) {
+var logicLeft = function() {
 
-    console.log("logicLeft start");
-    let timeNow = Date.now();
+    return new Promise(function(resolve, reject) {
 
-    animating_blocks = [];
+        console.log("logicLeft start");
+        let timeNow = Date.now();
 
-    let bool = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ];
+        animating_blocks = [];
 
-    let oldGrid = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ];
+        let bool = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
 
-    for (let a = 0; a < 4; a++) {
-        for (let b = 0; b < 4; b++) {
-            oldGrid[a][b] = grid[a][b];
+        let oldGrid = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
+
+        for (let c = 0; c < 4; c++) {
+            for (let d= 0; d < 4; d++) {
+                grid[c][d] = Number(grid[c][d]);
+            }
         }
-    }
 
-    for (let i = 0; i < grid.length; i++) {
-        for (let j = 0; j < grid.length; j++) {
-            if (grid[i][j] != 0) {
-                let pos = j-1;
-                while (pos >= 0 && grid[i][pos] === 0) {
-                    pos--;
-                }
-                if (pos !== -1 &&
-                    grid[i][pos] === grid[i][j] &&
-                    bool[i][pos] !== 1) {
+        for (let a = 0; a < 4; a++) {
+            for (let b = 0; b < 4; b++) {
+                oldGrid[a][b] = grid[a][b];
+            }
+        }
 
-                    grid[i][pos] *= 2;
-                    score += grid[i][pos];
-                    bool[i][pos] = 1;
-                    grid[i][j] = 0;
+        for (let i = 0; i < grid.length; i++) {
+            for (let j = 0; j < grid.length; j++) {
+                if (grid[i][j] != 0) {
+                    let pos = j-1;
+                    while (pos >= 0 && grid[i][pos] === 0) {
+                        pos--;
+                    }
+                    if (pos !== -1 &&
+                        grid[i][pos] === grid[i][j] &&
+                        bool[i][pos] !== 1) {
 
-                    let animated_block = {
-                        "start": {"row": i, "col": j},
-                        "end": {"row": i, "col": pos},
-                        "startTime": timeNow,
-                        "action": "slide"
-                    };
-                    animating_blocks.push(animated_block);
+                        grid[i][pos] *= 2;
+                        score += grid[i][pos];
+                        bool[i][pos] = 1;
+                        grid[i][j] = 0;
 
-                    animated_block = {
-                        "start": {"row": i, "col": pos},
-                        "end": {"row": i, "col": pos},
-                        "startTime": null,
-                        "action": "promote"
-                    };
-                    animating_blocks.push(animated_block);
-                } else {
-                    let temp = grid[i][pos+1];
-                    grid[i][pos+1] = grid[i][j];
-                    grid[i][j] = temp;
-
-                    if (pos !== j-1) { // block will move, start != end
                         let animated_block = {
                             "start": {"row": i, "col": j},
-                            "end": {"row": i, "col": pos+1},
+                            "end": {"row": i, "col": pos},
                             "startTime": timeNow,
                             "action": "slide"
                         };
                         animating_blocks.push(animated_block);
+
+                        animated_block = {
+                            "start": {"row": i, "col": pos},
+                            "end": {"row": i, "col": pos},
+                            "startTime": null,
+                            "action": "promote"
+                        };
+                        animating_blocks.push(animated_block);
+                    } else {
+                        let temp = grid[i][pos+1];
+                        grid[i][pos+1] = grid[i][j];
+                        grid[i][j] = temp;
+
+                        if (pos !== j-1) { // block will move, start != end
+                            let animated_block = {
+                                "start": {"row": i, "col": j},
+                                "end": {"row": i, "col": pos+1},
+                                "startTime": timeNow,
+                                "action": "slide"
+                            };
+                            animating_blocks.push(animated_block);
+                        }
                     }
                 }
             }
         }
-    }
 
-    if (!gameOver())
-        generateRand(oldGrid, timeNow);
+        if (!gameOver())
+            generateRand(oldGrid, timeNow);
 
-    console.log(grid);
-    console.log("logicLeft end");
-    return grid;
+        resolve(grid);
+
+        console.log("logicLeft end");
+    });
 }
 
 function logicRight() {
-    let timeNow = Date.now();
+    return new Promise(function(resolve, reject) {
+        let timeNow = Date.now();
 
-    animating_blocks = [];
+        animating_blocks = [];
 
-    let bool = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ];
+        let bool = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
 
-    let oldGrid = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ];
+        let oldGrid = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
 
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            oldGrid[i][j] = grid[i][j];
+        for (let a = 0; a < 4; a++) {
+            for (let b = 0; b < 4; b++) {
+                grid[a][b] = Number(grid[a][b]);
+            }
         }
-    }
 
-    for (let i = grid.length-1; i >= 0; i--) {
-        for (let j = grid.length-1; j >= 0; j--) {
-            if (grid[i][j] != 0) {
-                let pos = j+1;
-                while (pos <= 3 && grid[i][pos] === 0) {
-                    pos++;
-                }
-                if (pos !== 4 &&
-                    grid[i][pos] === grid[i][j] &&
-                    bool[i][pos] !== 1) {
+        for (let c = 0; c < 4; c++) {
+            for (let d = 0; d < 4; d++) {
+                oldGrid[c][d] = grid[c][d];
+            }
+        }
 
-                    grid[i][pos] *= 2;
-                    score += grid[i][pos];
-                    bool[i][pos] = 1;
-                    grid[i][j] = 0;
+        for (let i = grid.length-1; i >= 0; i--) {
+            for (let j = grid.length-1; j >= 0; j--) {
+                if (grid[i][j] != 0) {
+                    let pos = j+1;
+                    while (pos <= 3 && grid[i][pos] === 0) {
+                        pos++;
+                    }
+                    if (pos !== 4 &&
+                        grid[i][pos] === grid[i][j] &&
+                        bool[i][pos] !== 1) {
 
-                    let animated_block = {
-                        "start": {"row": i, "col": j},
-                        "end": {"row": i, "col": pos},
-                        "startTime": timeNow,
-                        "action": "slide"
-                    };
-                    animating_blocks.push(animated_block);
+                        grid[i][pos] *= 2;
+                        score += grid[i][pos];
+                        bool[i][pos] = 1;
+                        grid[i][j] = 0;
 
-                    animated_block = {
-                        "start": {"row": i, "col": pos},
-                        "end": {"row": i, "col": pos},
-                        "startTime": null,
-                        "action": "promote"
-                    };
-                    animating_blocks.push(animated_block);
-                } else {
-                    let temp = grid[i][pos-1];
-                    grid[i][pos-1] = grid[i][j];
-                    grid[i][j] = temp;
-
-                    if (pos !== j+1) { // block will move, start != end
                         let animated_block = {
                             "start": {"row": i, "col": j},
-                            "end": {"row": i, "col": pos-1},
+                            "end": {"row": i, "col": pos},
                             "startTime": timeNow,
                             "action": "slide"
                         };
                         animating_blocks.push(animated_block);
+
+                        animated_block = {
+                            "start": {"row": i, "col": pos},
+                            "end": {"row": i, "col": pos},
+                            "startTime": null,
+                            "action": "promote"
+                        };
+                        animating_blocks.push(animated_block);
+                    } else {
+                        let temp = grid[i][pos-1];
+                        grid[i][pos-1] = grid[i][j];
+                        grid[i][j] = temp;
+
+                        if (pos !== j+1) { // block will move, start != end
+                            let animated_block = {
+                                "start": {"row": i, "col": j},
+                                "end": {"row": i, "col": pos-1},
+                                "startTime": timeNow,
+                                "action": "slide"
+                            };
+                            animating_blocks.push(animated_block);
+                        }
                     }
                 }
             }
         }
-    }
 
-    if (!gameOver())
-        generateRand(oldGrid, timeNow);
+        if (!gameOver())
+            generateRand(oldGrid, timeNow);
+
+        resolve(grid);
+    });
 
 }
 
 function logicUp() {
-    let timeNow = Date.now();
+    return new Promise(function(resolve, reject) {
+        let timeNow = Date.now();
 
-    animating_blocks = [];
+        animating_blocks = [];
 
-    let bool = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ];
+        let bool = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
 
-    let oldGrid = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ];
+        let oldGrid = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
 
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            oldGrid[i][j] = grid[i][j];
+        for (let a = 0; a < 4; a++) {
+            for (let b = 0; b < 4; b++) {
+                grid[a][b] = Number(grid[a][b]);
+            }
         }
-    }
 
-    for (let i = 0; i < grid.length; i++) {
-        for (let j = 0; j < grid.length; j++) {
-            if (grid[j][i] != 0) {
-                let pos = j-1;
-                while (pos >= 0 && grid[pos][i] === 0) {
-                    pos--;
-                }
-                if (pos !== -1 &&
-                    grid[pos][i] === grid[j][i] &&
-                    bool[pos][i] !== 1) {
+        for (let c = 0; c < 4; c++) {
+            for (let d = 0; d < 4; d++) {
+                oldGrid[c][d] = grid[c][d];
+            }
+        }
 
-                    grid[pos][i] *= 2;
-                    score += grid[pos][i];
-                    bool[pos][i] = 1;
-                    grid[j][i] = 0;
+        for (let i = 0; i < grid.length; i++) {
+            for (let j = 0; j < grid.length; j++) {
+                if (grid[j][i] != 0) {
+                    let pos = j-1;
+                    while (pos >= 0 && grid[pos][i] === 0) {
+                        pos--;
+                    }
+                    if (pos !== -1 &&
+                        grid[pos][i] === grid[j][i] &&
+                        bool[pos][i] !== 1) {
 
-                    let animated_block = {
-                        "start": {"row": j, "col": i},
-                        "end": {"row": pos, "col": i},
-                        "startTime": timeNow,
-                        "action": "slide"
-                    };
-                    animating_blocks.push(animated_block);
+                        grid[pos][i] *= 2;
+                        score += grid[pos][i];
+                        bool[pos][i] = 1;
+                        grid[j][i] = 0;
 
-                    animated_block = {
-                        "start": {"row": pos, "col": i},
-                        "end": {"row": pos, "col": i},
-                        "startTime": null,
-                        "action": "promote"
-                    };
-                    animating_blocks.push(animated_block);
-                } else {
-                    let temp = grid[pos+1][i];
-                    grid[pos+1][i] = grid[j][i];
-                    grid[j][i] = temp;
-
-                    if (pos !== j-1) { // block will move, start != end
                         let animated_block = {
                             "start": {"row": j, "col": i},
-                            "end": {"row": pos+1, "col": i},
+                            "end": {"row": pos, "col": i},
                             "startTime": timeNow,
                             "action": "slide"
                         };
                         animating_blocks.push(animated_block);
+
+                        animated_block = {
+                            "start": {"row": pos, "col": i},
+                            "end": {"row": pos, "col": i},
+                            "startTime": null,
+                            "action": "promote"
+                        };
+                        animating_blocks.push(animated_block);
+                    } else {
+                        let temp = grid[pos+1][i];
+                        grid[pos+1][i] = grid[j][i];
+                        grid[j][i] = temp;
+
+                        if (pos !== j-1) { // block will move, start != end
+                            let animated_block = {
+                                "start": {"row": j, "col": i},
+                                "end": {"row": pos+1, "col": i},
+                                "startTime": timeNow,
+                                "action": "slide"
+                            };
+                            animating_blocks.push(animated_block);
+                        }
                     }
                 }
             }
         }
-    }
 
-    if (!gameOver())
-        generateRand(oldGrid, timeNow);
+        if (!gameOver())
+            generateRand(oldGrid, timeNow);
+
+        resolve(grid);
+    });
 }
 
 function logicDown() {
-    let timeNow = Date.now();
+    return new Promise(function(resolve, reject) {
+        let timeNow = Date.now();
 
-    animating_blocks = [];
+        animating_blocks = [];
 
-    let bool = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ];
+        let bool = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
 
-    let oldGrid = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ];
+        let oldGrid = [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0]
+        ];
 
-    for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            oldGrid[i][j] = grid[i][j];
+        for (let a = 0; a < 4; a++) {
+            for (let b = 0; b < 4; b++) {
+                grid[a][b] = Number(grid[a][b]);
+            }
         }
-    }
 
-    for (let i = grid.length-1; i >= 0; i--) {
-        for (let j = grid.length-1; j >= 0; j--) {
-            if (grid[j][i] != 0) {
-                let pos = j+1;
-                while (pos <= 3 && grid[pos][i] === 0) {
-                    pos++;
-                }
-                if (pos !== 4 &&
-                    grid[pos][i] === grid[j][i] &&
-                    bool[pos][i] !== 1) {
+        for (let c = 0; c < 4; c++) {
+            for (let d = 0; d < 4; d++) {
+                oldGrid[c][d] = grid[c][d];
+            }
+        }
 
-                    grid[pos][i] *= 2;
-                    score += grid[pos][i];
-                    bool[pos][i] = 1;
-                    grid[j][i] = 0;
+        for (let i = grid.length-1; i >= 0; i--) {
+            for (let j = grid.length-1; j >= 0; j--) {
+                if (grid[j][i] != 0) {
+                    let pos = j+1;
+                    while (pos <= 3 && grid[pos][i] === 0) {
+                        pos++;
+                    }
+                    if (pos !== 4 &&
+                        grid[pos][i] === grid[j][i] &&
+                        bool[pos][i] !== 1) {
 
-                    let animated_block = {
-                        "start": {"row": j, "col": i},
-                        "end": {"row": pos, "col": i},
-                        "startTime": timeNow,
-                        "action": "slide"
-                    };
-                    animating_blocks.push(animated_block);
+                        grid[pos][i] *= 2;
+                        score += grid[pos][i];
+                        bool[pos][i] = 1;
+                        grid[j][i] = 0;
 
-                    animated_block = {
-                        "start": {"row": pos, "col": i},
-                        "end": {"row": pos, "col": i},
-                        "startTime": null,
-                        "action": "promote"
-                    };
-                    animating_blocks.push(animated_block);
-                } else {
-                    let temp = grid[pos-1][i];
-                    grid[pos-1][i] = grid[j][i];
-                    grid[j][i] = temp;
-
-                    if (pos !== j+1) { // block will move, start != end
                         let animated_block = {
                             "start": {"row": j, "col": i},
-                            "end": {"row": pos-1, "col": i},
+                            "end": {"row": pos, "col": i},
                             "startTime": timeNow,
                             "action": "slide"
                         };
                         animating_blocks.push(animated_block);
+
+                        animated_block = {
+                            "start": {"row": pos, "col": i},
+                            "end": {"row": pos, "col": i},
+                            "startTime": null,
+                            "action": "promote"
+                        };
+                        animating_blocks.push(animated_block);
+                    } else {
+                        let temp = grid[pos-1][i];
+                        grid[pos-1][i] = grid[j][i];
+                        grid[j][i] = temp;
+
+                        if (pos !== j+1) { // block will move, start != end
+                            let animated_block = {
+                                "start": {"row": j, "col": i},
+                                "end": {"row": pos-1, "col": i},
+                                "startTime": timeNow,
+                                "action": "slide"
+                            };
+                            animating_blocks.push(animated_block);
+                        }
                     }
                 }
             }
         }
-    }
 
-    if (!gameOver())
-        generateRand(oldGrid, timeNow);
+        if (!gameOver())
+            generateRand(oldGrid, timeNow);
 
+        resolve(grid);
+    });
 }
 
-// *** Currently working on moveLeft, will fix others when this works ***
-function moveLeft(id) {
-    // let promise = new Promise(function(resolve, reject) {
-    //     client.hget("players", id, function(err, result) {
-    //         if (err) throw err
-    //         else {
-    //             console.log("moved left for player: " + result);
-    //             resolve(result);
-    //         }
-    //     })
-    // });
+function moveLeft(id, cb) {
+    var player;
+
     hget("players", id).then(res => {
+        player = res;
+        console.log("player: " + res);
         return updateGrid(res);
     })
     .then(res => {
         console.log(res);
-        return logicLeft(res);
-    }).then(res => {
+        return logicLeft();
+    })
+    .then(res => {
         console.log(res);
-    });
-    //.catch(error => console.log("this is the error: " + error));
-    // return {
-    //     newState: grid, 
-    //     animation: animating_blocks,
-    //     score: score,
-    //     isOver: game_over
-    // }
+        updateState(player);
+    })
+    .then(() => {
+        cb({
+            newState: grid, 
+            animation: animating_blocks,
+            score: score,
+            isOver: game_over
+        });
+    })
 }
 
-function moveRight(id) {
+function moveRight(id, cb) {
 
-    client.hget("players", id, function(err, result) {
-        if (err) throw err
-        else {
-            console.log("moved right for player: " + result);
-            updateGrid(result);
-            logicRight();
-            updateState(result);
-        }
+    var player;
+
+    hget("players", id).then(res => {
+        player = res;
+        console.log("player: " + res);
+        return updateGrid(res);
     })
-
-    return {
-        newState: grid, 
-        animation: animating_blocks,
-        score: score,
-        isOver: game_over
-    }
+    .then(res => {
+        console.log(res);
+        return logicRight();
+    })
+    .then(res => {
+        console.log(res);
+        updateState(player);
+    })
+    .then(() => {
+        cb({
+            newState: grid, 
+            animation: animating_blocks,
+            score: score,
+            isOver: game_over
+        });
+    })
 }
 
-function moveUp(id) {
+function moveUp(id, cb) {
 
-    client.hget("players", id, function(err, result) {
-        if (err) throw err
-        else {
-            console.log("moved up for player: " + result);
-            updateGrid(result);
-            logicUp();
-            updateState(result);
-        }
+    var player;
+    hget("players", id).then(res => {
+        player = res;
+        console.log("player: " + res);
+        return updateGrid(res);
     })
-
-    return {
-        newState: grid, 
-        animation: animating_blocks,
-        score: score,
-        isOver: game_over
-    }
+    .then(res => {
+        console.log(res);
+        return logicUp();
+    })
+    .then(res => {
+        console.log(res);
+        updateState(player);
+    })
+    .then(() => {
+        cb({
+            newState: grid, 
+            animation: animating_blocks,
+            score: score,
+            isOver: game_over
+        });
+    })
 }
 
-function moveDown(id) {
+function moveDown(id, cb) {
 
-    client.hget("players", id, function(err, result) {
-        if (err) throw err
-        else {
-            console.log("moved down for player: " + result);
-            updateGrid(result); 
-            logicDown();
-            updateState(result);
-                
-        }
+    var player;
+
+    hget("players", id).then(res => {
+        player = res;
+        console.log("player: " + res);
+        return updateGrid(res);
     })
-
-    return {
-        newState: grid, 
-        animation: animating_blocks,
-        score: score,
-        isOver: game_over
-    }
+    .then(res => {
+        console.log(res);
+        return logicDown();
+    })
+    .then(res => {
+        console.log(res);
+        updateState(player);
+    })
+    .then(() => {
+        cb({
+            newState: grid, 
+            animation: animating_blocks,
+            score: score,
+            isOver: game_over
+        });
+    })
 }
 
 exports.grid = grid;

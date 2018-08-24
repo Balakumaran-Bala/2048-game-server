@@ -25,17 +25,31 @@ io.on('connection', function (socket) {
 
     socket.on('playerMove', function(data) {
         console.log(socket.id);
-        if (data.key == 37)
-            var move = game.moveLeft(socket.id);
-        else if (data.key == 39)
-            var move = game.moveRight(socket.id);
-        else if (data.key == 38)
-            var move = game.moveUp(socket.id);
-        else if (data.key == 40)
-            var move = game.moveDown(socket.id);
 
-        console.log(move);
-        socket.emit('updateMove', {state: move});
+        if (data.key == 37){
+            game.moveLeft(socket.id, function(res) {
+                console.log("returned: " + res);
+                socket.emit('updateMove', {state: res});
+            });
+        }
+        else if (data.key == 39){
+            game.moveRight(socket.id, function(res) {
+                console.log("returned: " + res);
+                socket.emit('updateMove', {state: res});
+            });
+        }
+        else if (data.key == 38){
+            game.moveUp(socket.id, function(res) {
+                console.log("returned: " + res);
+                socket.emit('updateMove', {state: res});
+            });
+        }
+        else if (data.key == 40){
+            game.moveDown(socket.id, function(res) {
+                console.log("returned: " + res);
+                socket.emit('updateMove', {state: res});
+            });
+        }
     });
 
     socket.on('restart', function(data) {
