@@ -217,7 +217,7 @@ function gameOver() {
 }
 
 function restartGame(socket_id, player_id) {
-	score = 0;
+    score = 0;
     grid = [
         [0, 0, 0, 0],
         [0, 0, 0, 0],

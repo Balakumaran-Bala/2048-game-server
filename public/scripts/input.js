@@ -2,14 +2,14 @@ let fingerX = 0;
 let fingerY = 0;
 
 var inputInit = function() {
-	addEventListener("keydown", function(event) {
-	    if ([37, 38, 39, 40].includes(event.keyCode)) {
-	        event.preventDefault();
-	        socket.emit('playerMove', {key : event.keyCode});
-	    }
-	}, false);
+    addEventListener("keydown", function(event) {
+        if ([37, 38, 39, 40].includes(event.keyCode)) {
+            event.preventDefault();
+            socket.emit('playerMove', {key : event.keyCode});
+        }
+    }, false);
 
-	addEventListener("mousemove", function(event) {
+    addEventListener("mousemove", function(event) {
         let relativeX = event.clientX - canvas.offsetLeft;
         let relativeY = event.clientY - canvas.getBoundingClientRect().top;
 
@@ -31,7 +31,7 @@ var inputInit = function() {
             if (0 < relativeX && relativeX < canvas.width &&
                 500 < relativeY && relativeY < 590) {
                 //restartGame();
-            	socket.emit('restart');
+                socket.emit('restart');
             }
         }
     }, false);

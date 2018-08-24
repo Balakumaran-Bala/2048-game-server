@@ -58,9 +58,9 @@ images['2048'] = twoThousandFourtyEight;
 var animating_blocks = []; // array of objects
 
 // socket.on('updateMove', function(data) {
-// 	//console.log(data.state.animation);
-// 	animating_blocks = data.state.animation;
-// 	grid = data.state.newState;
+//  //console.log(data.state.animation);
+//  animating_blocks = data.state.animation;
+//  grid = data.state.newState;
 // });
 
 var render = function(timeNow) {
